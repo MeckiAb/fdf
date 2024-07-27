@@ -6,7 +6,7 @@
 #    By: labderra <labderra@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/24 20:19:18 by labderra          #+#    #+#              #
-#    Updated: 2024/07/24 20:57:55 by labderra         ###   ########.fr        #
+#    Updated: 2024/07/25 18:01:07 by labderra         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ SRC = main.c
 
 SRC_BONUS = main_bonus.c 
 
-CC = clang -Wall -Wextra -Werror -g -fsanitize=address
+CC = clang -Wall -Wextra -Werror -g -gdwarf-4 #-fsanitize=address
 
 OBJ = $(SRC:.c=.o)
 OBJ_BONUS = $(SRC_BONUS:.c=.o)
@@ -40,10 +40,8 @@ $(FT_PRINTF) :
 	make -C "ft_printf"
 
 $(MLX42) :
-	cd MLX42
-	cmake -B build
-	cmake --build build -j4
-	cd ..
+	cmake -B MLX42/build -S ./MLX42
+	cmake --build MLX42/build -j4
 
 %.o : %.c
 	$(CC) -c $< -o $@
@@ -62,6 +60,8 @@ fclean : clean
 
 re : fclean all
 
+test : all
+	./fdf
 # bonus: $(BONUS)
 
 # $(BONUS) : $(OBJ_BONUS) $(LIBFT) $(FT_PRINTF)
