@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: labderra <labderra@student.42malaga.com    +#+  +:+       +#+        */
+/*   By: labderra <labderra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 20:32:49 by labderra          #+#    #+#             */
-/*   Updated: 2024/07/28 16:35:03 by labderra         ###   ########.fr       */
+/*   Updated: 2024/07/29 13:59:04 by labderra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,33 +37,33 @@ uint32_t	grad_color(uint32_t start, uint32_t end, float step)
 	return (color);
 }
 
-void	plot(t_point start, t_point end, mlx_image_t *img)
+void	plot(t_point start, t_point end, mlx_image_t *img, int sf)
 {
 	float		slope;
 	uint32_t	i;
 	int			origin;
 
-	i = start.y;
+	i = start.y * sf;
 	if (end.x == start.x)
 	{
-		while (i++ < end.y)
-			mlx_put_pixel(img, start.x, i, grad_color(start.c,
-					end.c, (i - start.y + 0.0) / (end.y - start.y)));
+		while (i++ < end.y * sf)
+			mlx_put_pixel(img, start.x * sf, i, grad_color(start.c,
+					end.c, (i - start.y * sf + 0.0) / (end.y - start.y)));
 		return ;
 	}
 	slope = (float)(end.y - start.y) / (float)(end.x - start.x);
-	origin = start.y - slope * start.x;
+	origin = (start.y - slope * start.x) * sf;
 	if (slope <= 1.000 || slope >= -1.000)
 	{
-		i = start.x;
-		while (i++ < end.x)
+		i = start.x * sf;
+		while (i++ < end.x *sf)
 			mlx_put_pixel(img, i, i * slope + origin, grad_color(start.c,
-					end.c, (i - start.x + 0.0) / (end.x - start.x)));
+					end.c, (i - start.x * sf + 0.0) / (end.x - start.x)));
 		return ;
 	}
-	while (i++ < end.y)
+	while (i++ < end.y * sf)
 		mlx_put_pixel(img, (i - origin) / slope, i, grad_color(start.c,
-				end.c, (i - start.y + 0.0) / (end.y - start.y)));
+				end.c, (i - start.y *sf + 0.0) / (end.y - start.y)));
 }
 
 void	key_func(mlx_key_data_t keydata, void *param)
@@ -72,27 +72,28 @@ void	key_func(mlx_key_data_t keydata, void *param)
 		mlx_terminate((mlx_t *)param);
 }
 
-char	***read_fdf(char *f_name, char ***tmp_map, int *n_lines, int *line_len)
+char	***read_fdf(t_map *fdf)
 {
 	int		fd;
 	char	*tmp_line;
+	char	***tmp_map;
 
-	tmp_map = (char ***)ft_calloc(1024, sizeof(char **));
-	fd = open(f_name, O_RDONLY);
+	tmp_map = (char ***)malloc(1024 * sizeof(char **));
+	fd = open(fdf->filename, O_RDONLY);
 	if (!tmp_map || fd == -1)
 		return (NULL);
-	*n_lines = 0;
+	fdf->max_y = 0;
 	tmp_line = get_next_line(fd);
 	while (tmp_line)
 	{
-		tmp_map[*n_lines++] = ft_split(tmp_line, ' ');
+		tmp_map[fdf->max_y++] = ft_split(tmp_line, ' ');
 		free(tmp_line);
 		tmp_line = get_next_line(fd);
 	}
 	close (fd);
-	*line_len = 0;
-	while (tmp_map[0][*line_len])
-		*line_len += 1;
+	fdf->max_x = 0;
+	while (tmp_map[0][fdf->max_x])
+		fdf->max_x++;
 	return (tmp_map);
 }
 
@@ -115,6 +116,7 @@ void	free_matrix(char ***matrix)
 		free_split(matrix[i++]);
 	free(matrix);
 }
+
 uint32_t	atoi_x(char *str)
 {
 	uint32_t	acc;
@@ -149,40 +151,67 @@ uint32_t	load_color(char *str)
 		return (0xffffffff);
 }
 
-int	load_map(char *f_name, t_map fdf)
+int	check_square_map(char ***tmp_map, t_map *fdf)
+{
+	int	j;
+	
+	j = 0;
+	while(j < fdf->max_y)
+	{
+		if (!tmp_map[fdf->max_x - 1][j] || tmp_map[fdf->max_x][j])
+			return (-1);
+		j++;
+	}
+	return (0);
+}
+
+int	load_map(t_map *fdf)
 {
 	char	***tmp_map;
 	int		j;
 	int		i;
 
-	tmp_map = NULL;
-	tmp_map = read_fdf(f_name, tmp_map, &fdf.max_x, &fdf.max_y);
-	fdf.map_data = malloc(sizeof(t_point) * fdf.max_x * fdf.max_y);
-	if (fdf.max_x == 0 || fdf.max_y == 0 || !tmp_map || !fdf.map_data)
-		return (-1);
+	tmp_map = read_fdf(fdf);
+	fdf->map_data = malloc(sizeof(t_point) * fdf->max_x * fdf->max_y);
+	if (fdf->max_x == 0 || fdf->max_y == 0 || !tmp_map
+			|| check_square_map(tmp_map, fdf) == -1 || !fdf->map_data)
+		return (free_matrix(tmp_map), free(fdf->map_data), -1);
 	i = -1;
-	while (++i < fdf.max_x)
+	while (++i < fdf->max_x)
 	{
 		j = 0;
-		while (j < fdf.max_y && tmp_map[i][j])
+		while (j < fdf->max_x && tmp_map[i][j])
 		{
-			fdf.map_data[i][j].x = (i + j) * 0.87;
-			fdf.map_data[i][j].y = (i - j) * 0.5 + ft_atoi(tmp_map[i][j]);
-			fdf.map_data[i][j].c = load_color(tmp_map[i][j]);
-			j++;
+			fdf->map_data[i][j].x = (i + j) * 0.87;
+			fdf->map_data[i][j].y = (i - j) * 0.5 + ft_atoi(tmp_map[i][j]);
+			fdf->map_data[i][j].c = load_color(tmp_map[i][j]);
+			i++;
 		}
-		if (!(j < fdf.max_y && tmp_map[i][j]))
-			return (-1);
 	}
 	return (free_matrix(tmp_map), 0);		
+}
+
+int	init_fdf(t_map **fdf, char *filename)
+{
+	*fdf = malloc(sizeof(t_map));
+	if ( !(*fdf))
+		return (-1);
+	(*fdf)->filename = filename;
+	(*fdf)->max_x = 0;
+	(*fdf)->max_y = 0;
+	(*fdf)->img_width = 400;
+	(*fdf)->img_height = 400;
+	(*fdf)->scale_factor = 20;
+	(*fdf)->map_data = NULL;
+	return (0);
 }
 
 int	main(int argc, char **argv)
 {
 	mlx_t		*mlx;
 	mlx_image_t	*img;
-//	int			i;
-//	int			j;
+	int			i;
+	int			j;
 	t_map		*fdf;
 	
 /* 	t_point		origin = {0, 0, 0x00ffffff};
@@ -190,22 +219,35 @@ int	main(int argc, char **argv)
 
 	if (argc != 2 || !ft_strnstr(argv[1], ".fdf\0", ft_strlen(argv[1]) + 1))
 		return (write(2, "Usage : ./fdf <filename.fdf>\n", 29), 1);
-	fdf = malloc (sizeof(t_map));
-	if (!fdf || load_map(argv[1], *fdf) == -1)
-		return (write(2, "Error reading map or map invalid\n", 33), 1);
+
+	if (init_fdf(&fdf, argv[1]) == -1 || load_map(fdf) == -1)
+		return (write(2, "Error reading map or Bad map\n", 33), free(fdf), 1);
+
+
 	mlx = mlx_init(400, 400, "FdF", 1);
 	if (!mlx)
 		return (1);
-	img = mlx_new_image(mlx, 400, 400);
-//	i = 0;
-//	j = 0;
+	img = mlx_new_image(mlx, fdf->img_width, fdf->img_height);
+
+
 //	plot(origin, end, img);
-	
-/* 
-	i = 10;
-	while (i < 400)
+	i = 0;
+
+	while (i < fdf->max_x - 1)
 	{
-		origin.y = i;
+		j = 0;
+		while (j < fdf->max_y - 1)
+		{
+			plot(fdf->map_data[i][j], fdf->map_data[i + 1][j],
+				img, fdf->scale_factor);
+			plot(fdf->map_data[i][j], fdf->map_data[i][j + 1],
+				img, fdf->scale_factor);
+			j++;
+		}
+		i++;
+	}
+
+/*		origin.y = i;
 		end.y = i;
 		plot(origin, end, img);
 		i += 38;		

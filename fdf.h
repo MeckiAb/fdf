@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   fdf.h                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: labderra <labderra@student.42malaga.com    +#+  +:+       +#+        */
+/*   By: labderra <labderra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 21:20:46 by labderra          #+#    #+#             */
-/*   Updated: 2024/07/28 12:18:07 by labderra         ###   ########.fr       */
+/*   Updated: 2024/07/29 13:01:10 by labderra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ typedef struct s_point
 
 typedef struct s_map
 {
+	char	*filename;
 	int		max_x;
 	int		max_y;
 	int 	img_width;
