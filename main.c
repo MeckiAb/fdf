@@ -6,7 +6,7 @@
 /*   By: labderra <labderra@student.42malaga.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 20:32:49 by labderra          #+#    #+#             */
-/*   Updated: 2024/07/28 01:04:51 by labderra         ###   ########.fr       */
+/*   Updated: 2024/07/28 16:35:03 by labderra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ char	***read_fdf(char *f_name, char ***tmp_map, int *n_lines, int *line_len)
 	close (fd);
 	*line_len = 0;
 	while (tmp_map[0][*line_len])
-		*line_len++;
+		*line_len += 1;
 	return (tmp_map);
 }
 
@@ -134,7 +134,6 @@ uint32_t	atoi_x(char *str)
 uint32_t	load_color(char *str)
 {
 	char		**tmp_color;
-	uint32_t	color;
 	
 	if (ft_strchr(str, 'x'))
 	{
@@ -150,30 +149,29 @@ uint32_t	load_color(char *str)
 		return (0xffffffff);
 }
 
-int	load_map(char *f_name, t_point ***map_file)
+int	load_map(char *f_name, t_map fdf)
 {
 	char	***tmp_map;
 	int		j;
 	int		i;
-	int		n_lines;
-	int		line_len;
 
-	tmp_map = read_fdf(f_name, tmp_map, &n_lines, &line_len);
-	map_file = malloc(sizeof(t_point) * n_lines * line_len);
-	if (n_lines == 0 || line_len == 0 || !tmp_map || !map_file)
+	tmp_map = NULL;
+	tmp_map = read_fdf(f_name, tmp_map, &fdf.max_x, &fdf.max_y);
+	fdf.map_data = malloc(sizeof(t_point) * fdf.max_x * fdf.max_y);
+	if (fdf.max_x == 0 || fdf.max_y == 0 || !tmp_map || !fdf.map_data)
 		return (-1);
 	i = -1;
-	while (++i < n_lines)
+	while (++i < fdf.max_x)
 	{
 		j = 0;
-		while (j < line_len && tmp_map[i][j])
+		while (j < fdf.max_y && tmp_map[i][j])
 		{
-			map_file[i][j]->x = (i + j) * 0.87;
-			map_file[i][j]->y = (i - j) * 0.5 + ft_atoi(tmp_map[i][j]);
-			map_file[i][j]->c = load_color(tmp_map[i][j]);
+			fdf.map_data[i][j].x = (i + j) * 0.87;
+			fdf.map_data[i][j].y = (i - j) * 0.5 + ft_atoi(tmp_map[i][j]);
+			fdf.map_data[i][j].c = load_color(tmp_map[i][j]);
 			j++;
 		}
-		if (!(j < line_len && tmp_map[i][j]))
+		if (!(j < fdf.max_y && tmp_map[i][j]))
 			return (-1);
 	}
 	return (free_matrix(tmp_map), 0);		
@@ -183,25 +181,25 @@ int	main(int argc, char **argv)
 {
 	mlx_t		*mlx;
 	mlx_image_t	*img;
-	int			i;
-	int			j;
-	t_point		**map_file;
+//	int			i;
+//	int			j;
+	t_map		*fdf;
 	
 /* 	t_point		origin = {0, 0, 0x00ffffff};
 	t_point		end = {400, 200, 0xff0000ff}; */
 
 	if (argc != 2 || !ft_strnstr(argv[1], ".fdf\0", ft_strlen(argv[1]) + 1))
 		return (write(2, "Usage : ./fdf <filename.fdf>\n", 29), 1);
-	if (load_map(argv[1], &map_file) == -1)
+	fdf = malloc (sizeof(t_map));
+	if (!fdf || load_map(argv[1], *fdf) == -1)
 		return (write(2, "Error reading map or map invalid\n", 33), 1);
 	mlx = mlx_init(400, 400, "FdF", 1);
 	if (!mlx)
 		return (1);
 	img = mlx_new_image(mlx, 400, 400);
-	i = 0;
-	
-	j = 0;
-	plot(origin, end, img);
+//	i = 0;
+//	j = 0;
+//	plot(origin, end, img);
 	
 /* 
 	i = 10;
