@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: labderra <labderra@student.42malaga.com    +#+  +:+       +#+         #
+#    By: labderra <labderra@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/24 20:19:18 by labderra          #+#    #+#              #
-#    Updated: 2024/07/25 18:01:07 by labderra         ###   ########.fr        #
+#    Updated: 2024/07/30 13:10:44 by labderra         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,13 +16,13 @@ LIBFT = libft/libft.a
 FT_PRINTF = ft_printf/libftprintf.a
 # MATH = -lm
 MLX42 = ./MLX42/build/libmlx42.a 
-MLX_FLAGS = -I ./MLX42/include -ldl -lglfw -pthread -lm
+MLX_FLAGS = -Iinclude -ldl -lglfw -pthread -lm
 
 SRC = main.c 
 
 SRC_BONUS = main_bonus.c 
 
-CC = clang -Wall -Wextra -Werror -g -gdwarf-4 #-fsanitize=address
+CC = clang -Wall -Wextra -Werror -g -gdwarf-4 -fsanitize=address
 
 OBJ = $(SRC:.c=.o)
 OBJ_BONUS = $(SRC_BONUS:.c=.o)

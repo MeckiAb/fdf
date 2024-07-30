@@ -6,7 +6,7 @@
 /*   By: labderra <labderra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 20:32:49 by labderra          #+#    #+#             */
-/*   Updated: 2024/07/29 13:59:04 by labderra         ###   ########.fr       */
+/*   Updated: 2024/07/30 14:04:07 by labderra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,7 @@ char	***read_fdf(t_map *fdf)
 		free(tmp_line);
 		tmp_line = get_next_line(fd);
 	}
+	tmp_map[fdf->max_y] = ft_calloc(sizeof(char **), 1);
 	close (fd);
 	fdf->max_x = 0;
 	while (tmp_map[0][fdf->max_x])
@@ -110,10 +111,16 @@ void	free_split(char **str)
 void	free_matrix(char ***matrix)
 {
 	int	i;
+	int	j;
 
 	i = 0;
 	while (matrix && matrix[i])
-		free_split(matrix[i++]);
+	{
+		j = 0;
+		while (matrix[i] && matrix[i][j])
+			free(matrix[i][j++]);
+		free(matrix[i++]);
+	}
 	free(matrix);
 }
 
@@ -153,14 +160,14 @@ uint32_t	load_color(char *str)
 
 int	check_square_map(char ***tmp_map, t_map *fdf)
 {
-	int	j;
+	int	i;
 	
-	j = 0;
-	while(j < fdf->max_y)
+	i = 0;
+	while(i < fdf->max_y)
 	{
-		if (!tmp_map[fdf->max_x - 1][j] || tmp_map[fdf->max_x][j])
+		if (!(tmp_map[i][fdf->max_x - 1] && !tmp_map[i][fdf->max_x]))
 			return (-1);
-		j++;
+		i++;
 	}
 	return (0);
 }
@@ -172,20 +179,25 @@ int	load_map(t_map *fdf)
 	int		i;
 
 	tmp_map = read_fdf(fdf);
-	fdf->map_data = malloc(sizeof(t_point) * fdf->max_x * fdf->max_y);
 	if (fdf->max_x == 0 || fdf->max_y == 0 || !tmp_map
-			|| check_square_map(tmp_map, fdf) == -1 || !fdf->map_data)
-		return (free_matrix(tmp_map), free(fdf->map_data), -1);
+			|| check_square_map(tmp_map, fdf) == -1)
+		return (free_matrix(tmp_map), -1);
+	fdf->map_data = malloc(sizeof(t_point *) * fdf->max_y);
+	if (!fdf->map_data)
+		return (free_matrix(tmp_map), -1);
 	i = -1;
-	while (++i < fdf->max_x)
+	while (++i < fdf->max_y)
 	{
+		fdf->map_data[i] = malloc(sizeof(t_point) * fdf->max_x);
+		if (!fdf->map_data[i])
+			return (free_matrix(tmp_map), -1);
 		j = 0;
 		while (j < fdf->max_x && tmp_map[i][j])
 		{
 			fdf->map_data[i][j].x = (i + j) * 0.87;
 			fdf->map_data[i][j].y = (i - j) * 0.5 + ft_atoi(tmp_map[i][j]);
 			fdf->map_data[i][j].c = load_color(tmp_map[i][j]);
-			i++;
+			j++;
 		}
 	}
 	return (free_matrix(tmp_map), 0);		
@@ -201,7 +213,7 @@ int	init_fdf(t_map **fdf, char *filename)
 	(*fdf)->max_y = 0;
 	(*fdf)->img_width = 400;
 	(*fdf)->img_height = 400;
-	(*fdf)->scale_factor = 20;
+	(*fdf)->scale_factor = 10;
 	(*fdf)->map_data = NULL;
 	return (0);
 }
@@ -214,8 +226,8 @@ int	main(int argc, char **argv)
 	int			j;
 	t_map		*fdf;
 	
-/* 	t_point		origin = {0, 0, 0x00ffffff};
-	t_point		end = {400, 200, 0xff0000ff}; */
+/* 	t_point		origin = {5, 5, 0x00ffffff};
+	t_point		end = {350, 250, 0xff0000ff}; */
 
 	if (argc != 2 || !ft_strnstr(argv[1], ".fdf\0", ft_strlen(argv[1]) + 1))
 		return (write(2, "Usage : ./fdf <filename.fdf>\n", 29), 1);
@@ -230,7 +242,7 @@ int	main(int argc, char **argv)
 	img = mlx_new_image(mlx, fdf->img_width, fdf->img_height);
 
 
-//	plot(origin, end, img);
+//	plot(origin, end, img, fdf->scale_factor);
 	i = 0;
 
 	while (i < fdf->max_x - 1)
@@ -238,14 +250,16 @@ int	main(int argc, char **argv)
 		j = 0;
 		while (j < fdf->max_y - 1)
 		{
-			plot(fdf->map_data[i][j], fdf->map_data[i + 1][j],
+			printf("(%u, %u)\n", fdf->map_data[i][j].x, fdf->map_data[i][j].y);
+/* 			plot(fdf->map_data[i][j], fdf->map_data[i + 1][j],
 				img, fdf->scale_factor);
 			plot(fdf->map_data[i][j], fdf->map_data[i][j + 1],
-				img, fdf->scale_factor);
+				img, fdf->scale_factor); */
 			j++;
 		}
 		i++;
 	}
+
 
 /*		origin.y = i;
 		end.y = i;
