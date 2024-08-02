@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: labderra <labderra@student.42.fr>          +#+  +:+       +#+         #
+#    By: labderra <labderra@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/07/24 20:19:18 by labderra          #+#    #+#              #
-#    Updated: 2024/07/30 13:10:44 by labderra         ###   ########.fr        #
+#    Updated: 2024/08/03 00:54:18 by labderra         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ SRC = main.c
 
 SRC_BONUS = main_bonus.c 
 
-CC = clang -Wall -Wextra -Werror -g -gdwarf-4 -fsanitize=address
+CC = clang -Wall -Wextra -Werror -g -gdwarf-4 #-fsanitize=address
 
 OBJ = $(SRC:.c=.o)
 OBJ_BONUS = $(SRC_BONUS:.c=.o)
