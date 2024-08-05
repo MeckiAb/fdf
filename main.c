@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: labderra <labderra@student.42malaga.com    +#+  +:+       +#+        */
+/*   By: labderra <labderra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/24 20:32:49 by labderra          #+#    #+#             */
-/*   Updated: 2024/08/04 19:47:54 by labderra         ###   ########.fr       */
+/*   Updated: 2024/08/05 10:31:49 by labderra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ int	main(int argc, char **argv)
 		return (write(2, "Usage : ./fdf <filename.fdf>\n", 29), 1);
 	if (init_fdf(&fdf, argv[1]) == -1 || load_map(fdf) == -1)
 		return (write(2, "Error reading map or Bad map\n", 29), 1);
-	mlx = mlx_init(1000, 1000, "FdF", 1);
+	mlx = mlx_init(1800, 1800, "FdF", 1);
 	if (!mlx)
 		return (perror("mlx"), 1);
 	img = mlx_new_image(mlx, fdf->img_width, fdf->img_height);

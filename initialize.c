@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   initialize.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: labderra <labderra@student.42malaga.com    +#+  +:+       +#+        */
+/*   By: labderra <labderra@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/04 17:14:46 by labderra          #+#    #+#             */
-/*   Updated: 2024/08/04 19:49:27 by labderra         ###   ########.fr       */
+/*   Updated: 2024/08/05 10:33:29 by labderra         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ int	load_map(t_map *fdf)
 		while (j--)
 		{
 			fdf->map_data[i][j].x = (i - j) * 87;
-			fdf->map_data[i][j].y = (i + j) * 50 - 87 * ft_atoi(tmp_map[j][i]);
+			fdf->map_data[i][j].y = (i + j) * 50 - 100 * ft_atoi(tmp_map[j][i]);
 			fdf->map_data[i][j].c = load_color(tmp_map[j][i]);
 		}
 	}
@@ -120,8 +120,8 @@ int	init_fdf(t_map **fdf, char *filename)
 	(*fdf)->x_rng[1] = 0;
 	(*fdf)->y_rng[0] = 0;
 	(*fdf)->y_rng[1] = 0;
-	(*fdf)->img_width = 1000;
-	(*fdf)->img_height = 1000;
+	(*fdf)->img_width = 1800;
+	(*fdf)->img_height = 1800;
 	(*fdf)->scale = 1.0;
 	(*fdf)->o_xy[0] = 0;
 	(*fdf)->o_xy[1] = 0;
